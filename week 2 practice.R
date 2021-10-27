@@ -207,5 +207,4 @@ plot(df)
     library(tmaptools)
     library(sf)
     library(rgdal)
-    library(geojsonio)                     
-    
+    library(geojsonio)   
