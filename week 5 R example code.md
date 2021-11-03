@@ -17,6 +17,8 @@ library(sf)
 library(tidyverse)
 library(janitor)
 library(here)
+library(tmap)
+library(tmaptools)
 ```
 
 ```{r wards etc}
@@ -118,6 +120,49 @@ mapnorm <- all_data_three %>%
 
 Worldcities_extract <- Worldcities %>%
   clean_names()%>%
-  fliter(c)
+  filter(cntry_name == "United Kingdom")%>%
+  filter(city_name=="London" | city_name == "Birmingham" | city_name == "Edinburgh")
+
+UK_outline <- st_read(here::here(
+                                 "gadm36_GBR_shp",
+                                 "gadm36_GBR_0.shp")) %>%
+  st_transform(., 27700)
+```
+
+```{r mapping}
+
+tmap_mode("plot")
+
+#breaks = c(0, 5, 12, 26, 57, 286)
+
+#t<-getJenksBreaks(mapnorm$airbnb_norm, k=5)
+
+tm1<-tm_shape(mapnorm)+
+  tm_polygons("airbnb_norm",
+              style="jenks",
+              palette="PuBu")+
+  tm_legend(show=FALSE)+
+  tm_layout(frame=FALSE)+
+  tm_credits("(a)", position=c(0,0.85), size=1.5)
+
+tm2<-tm_shape(mapnorm)+
+  tm_polygons("hotelnorm",
+              style="jenks",
+              palette="PuBu")+
+  tm_legend(show=FALSE)+
+  tm_layout(frame=FALSE)+
+  tm_credits("(b)", position=c(0,0.85), size=1.5)
+
+newbb <- c(xmin=-296000, ymin=5408, xmax=655696, ymax=1000000) %>%
+
+UK_outlinecrop <- UK_outline$geometry %>%
+  st_crop(., newbb)
+
+
+tm3<-tm_shape(UK_outlinecrop)+
+    tm_polygons(col="darkslategray1")+
+    tm_layout(frame=FALSE)+
+    tm_shape(Worldcities_extract)
+
 
 ```
